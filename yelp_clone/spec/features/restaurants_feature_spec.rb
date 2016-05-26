@@ -51,12 +51,17 @@ feature 'restaurants' do
 
   context 'editing restaurants' do
 
-    before { Restaurant.create name: 'KFC', description: 'Deep fried goodness' }
+    before do
+      signing_up(email: 'initialize@signup.com')
+      create_restaurant
+      click_link "Sign out"
+    end
 
     scenario 'let a user edit a restaurant' do
       signing_up
+      create_restaurant(name: 'Bob\'s Burgers')
       visit '/restaurants'
-      click_link 'Edit KFC'
+      click_link 'Edit Bob\'s Burgers'
       fill_in 'Name', with:'Kentucky Fried Chicken'
       fill_in 'Description', with:'Deep fried goodness'
       click_button 'Update Restaurant'
@@ -64,16 +69,37 @@ feature 'restaurants' do
       expect(page).to have_content 'Deep fried goodness'
       expect(current_path).to eq '/restaurants'
     end
+
+    scenario 'user cannot edit someone elses restaurant' do
+      signing_up
+      click_link 'Sign out'
+      signing_up(email: 'bob@rob.cob')
+      click_link 'Edit KFC'
+      expect(current_path).to eq '/restaurants'
+      expect(page).to have_content 'Error: Cannot edit someone elses restaurant'
+    end
   end
 
   context 'deleting restaurants' do
-    before { Restaurant.create name: 'KFC', description: 'Deep fried goodness' }
-    scenario 'removes a restaurant when a user clicks a delete link' do
+    before do
       signing_up
+      create_restaurant
+    end
+
+    scenario 'removes a restaurant when a user clicks a delete link' do
       visit '/restaurants'
       click_link 'Delete KFC'
       expect(page).not_to have_content 'KFC'
       expect(page).to have_content 'Restaurant deleted successfully'
+    end
+
+    scenario 'removes a restaurant when a user clicks a delete link' do
+      click_link 'Sign out'
+      signing_up(email: 'grig@grig.grig')
+      visit '/restaurants'
+      click_link 'Delete KFC'
+      expect(current_path).to eq '/restaurants'
+      expect(page).to have_content 'Error: Cannot delete someone elses restaurant'
     end
   end
 
