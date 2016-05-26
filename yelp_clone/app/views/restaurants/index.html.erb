@@ -3,6 +3,7 @@
     <h2>
       <%= link_to restaurant.name, restaurant_path(restaurant) %>
     </h2>
+    <%= image_tag restaurant.image.url(:thumb) %>
     <%= restaurant.description %> <br>
     <h4> Reviews: </h4>
     <br>
